@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+		<meta charset="UTF-8">
+		<title>Flappy</title>
+</head>
+<body >
+<script>
+
+    var bg = new Image();
+    bg.src = "/home/vicky/Desktop/javascript/flappyBird/footer.png";
+    var bg1 = new Image();
+    bg1.src = "/home/vicky/Desktop/javascript/flappyBird/new";
+	var WIDTH=1800,HEIGHT=800,pi=Math.PI;
+	var spacebar = 32;
+	var canvas,ctx,keystate;
+	var bird,background1,pipe,count=0,count1 = 15,count2=0;
+
+    background1 = {
+    	x:0,
+    	y:300,
+    	
+    	update : function(){
+    		if(this.x === -7500)
+    			this.x=0;
+    		else
+    		this.x = this.x - 15 ;
+    	},
+
+    	draw : function(){
+    		ctx.drawImage(bg,this.x,this.y);
+    	}
+    };
+
+    var hitdetect = function(px,bx,py,by,pw,bw,ph,bh){
+      	    	return (bx <px+pw && px <bx+bw && py<by+bh && by <py+ph) ;
+      		};
+    bird = {
+    	x:100,
+    	y:100,
+    	gravity : 1,
+    	vel : 0,
+
+    	update :  function(){
+    		document.getElementById('status').innerHTML = count2;
+    		
+    		if(keystate[spacebar] ) //hit spacebar
+    			this.vel = -10;
+    		this.vel += this.gravity;
+    		
+    		if(!(this.y +this.vel <HEIGHT && this.y + this.vel > 0))
+  			{	clearInterval(loopInterval);
+  				ctx.fillStyle = "#FC0";
+        		ctx.font = "italic bold 72px Arial ,sans-serif";
+        		ctx.fillText('Game_over', 400, 200, 500);
+    		}
+    		else
+    		this.y += this.vel;
+    	},
+
+    	draw : function(){
+    		ctx.fillStyle = "#ff3300";
+			ctx.beginPath();
+			ctx.arc(this.x,this.y,25,0,2*Math.PI);
+			ctx.stroke();
+			ctx.fill();
+   		}
+    };
+
+    var total = [
+    				{"x":1600,"y":0,"w":100,"bg":"#32c22a","top1": Math.random()*(HEIGHT-20)/2,"bot":Math.random()*(HEIGHT-20)/2},
+    			];
+    pipe = {	
+    	update : function(){
+    		if(count === count1)
+    		{
+    			total.push({"x":1800,"y":0,"bg":"#32c22a","w":100,"top1": Math.random()*(HEIGHT-20)/2,"bot":Math.random()*(HEIGHT-20)/2});
+				count1 = Math.floor(Math.random()*15 +15 );
+				count = 0;
+			}
+			count++;
+    		for (var i = 0; i < total.length; i++) {
+    			total[i].x -= 15
+    		}
+    	},
+
+    	draw : function(){
+    		    for (var i = 0; i < total.length; i++) {
+    		    if(hitdetect(bird.x,total[i].x,bird.y-25,total[i].y,25,total[i].w,25,total[i].top1) || hitdetect(bird.x,total[i].x,bird.y,HEIGHT-total[i].bot,25,total[i].w,25,total[i].bot )){
+    				total[i].bg ="red";
+    				count2 = 0;
+    			}	
+    		    if(total[i].x + total[i].w < 0){
+    			total.splice(i,1);
+    			count2++;
+    			}
+    			ctx.fillStyle = total[i].bg;
+    			ctx.fillRect(total[i].x,0,total[i].w,total[i].top1);
+    			ctx.fillRect(total[i].x,HEIGHT - total[i].bot, total[i].w ,total[i].bot);
+    		}
+    	}
+    }
+	function main(){
+		canvas = document.createElement("canvas");
+		canvas.width = WIDTH;
+		canvas.height = HEIGHT;
+		ctx = canvas.getContext("2d");
+		document.body.appendChild(canvas);
+
+		ctx.fillStyle = "#FC0";
+        ctx.font = "italic bold 72px Arial ,sans-serif";
+        ctx.fillText('Press Enter to Play', 400, 200, 500);
+        		//ctx.drawImage(bg1,100,150);
+        keystate = {};
+		document.addEventListener("keydown", function(evt){
+			keystate[evt.keyCode] = true ;
+		});
+		document.addEventListener("keyup", function(evt){
+			delete keystate[evt.keyCode];
+		});
+
+		init();
+	}
+	function animate(){
+            update();
+            //snake.death();
+            draw();
+
+        ctx.fillStyle = "black";       
+        };
+        
+
+	function init(){
+
+		background1.x = 0;
+		background1.y = -100;
+	}	
+
+	function update(){
+		background1.update();
+		bird.update();
+		pipe.update();
+	}
+
+	function draw(){
+		ctx.fillRect(0,0,WIDTH,HEIGHT);
+		ctx.save();
+		ctx.fillStyle = "#fff";
+		background1.draw();
+		bird.draw();
+		pipe.draw();
+		ctx.restore();
+	}
+document.addEventListener("keydown", function(evt){
+			if(evt.keyCode===13) 
+			var loopInterval = setInterval(animate, 35);
+		});
+main();
+</script>
+<h2> Score : <h2>
+<h3 id="status"></h3>
+</body>
+</html>
